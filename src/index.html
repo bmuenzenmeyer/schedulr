@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="schedulr">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
@@ -8,14 +8,15 @@
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.min.js"></script>
-  <script src="js/moment.min.js"></script>
+  <script src="js/modules/sortable.js"></script>
+  <script src="js/modules/moment.min.js"></script>
   <script src="js/schedulr.js"></script>
   <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
   <link href="css/schedulr.css" rel="stylesheet">
   <link href="css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
 </head>
 <body>
-  <div ng-controller="WeekCtrl" class="app" id="schedulr">
+  <div ng-controller="SchedulrCtrl" class="app" id="schedulr">
     <h3 class="class="inline hideOnPrint"">Schedulr</h3>
     <section class="toolbar">
       <form class="form-inline">
@@ -28,37 +29,38 @@
       </form>
     </section>
     <section class="composer">
-<!--       <div class="shiftList hideOnPrint">
+      <div class="shiftComposer hideOnPrint">
         <form class="shiftBuilder">
           <div class="form-group">
-            <label for="empInput">Employee Name</label><input id ="empInput" name="empInput" type="text" class="form-control"/>
+            <input id="empInput" ng-model="shiftBuilderName" name="empInput" type="text" class="form-control" placeholder="Employee Name" tabindex="1"/>
           </div>
           <div class="form-group">
-            <label for="shiftStart">Shift Start</label><input id ="shiftStartInput" name="shiftStartInput" type="text" class="form-control"/>
+            <input id="shiftStartInput" ng-model="shiftBuilderStart" name="shiftStartInput" type="text" class="form-control" placeholder="Shift Start" tabindex="2"/>
           </div>
           <div class="form-group">
-            <label for="shiftEnd">Shift End</label><input id ="shiftEndInput" name="shiftEnd" type="text" class="form-control"/>
+            <input id="shiftEndInput" ng-model="shiftBuilderEnd" name="shiftEnd" type="text" class="form-control" placeholder="Shift End" tabindex="3"/>
+          </div>
+          <div class="form-group">
+              <a class="btn btn-primary" ng-click="addShift()" tabindex="4">Create Shift</a>
           </div>
         </form>
-      </div> -->
-      <div class="dayCols" >
+        <ul ui-sortable="sortableOptions" ng-model="unScheduledShifts" class="shiftList unscheduled">
+          <li ng-repeat="shift in unScheduledShifts" class="shift unscheduled">
+            <h5><strong>{{ shift.empName }}</strong></h5>
+            <span>{{ shift.start }} &mdash; {{ shift.end }}
+          </li>
+        </ul>
+      </div>
+      <div class="dayCols">
         <div class="day" ng-repeat="day in days">
-          <h5 class="dayTitle dayOfWeek"><strong>{{day.dayOfWeek}}</strong></h5>
+          <h4 class="dayTitle dayOfWeek"><strong>{{day.dayOfWeek}}</strong></h4>
           <h5 class="dayTitle dayMDate">{{day.mDate}}</h5>
-          <ul class="connectedSortable" id="{{day.dId}}">
-  <!--             <li class="">1</li>
-              <li class="">2</li>
-              <li class="">3</li>
-              <li class="">4</li>
-              <li class="">5</li>
-              <li class="">6</li>
-              <li class="">7</li>
-              <li class="">8</li>
-              <li class="">9</li>
-              <li class="">10</li>
-              <li class="">11</li>
-              <li class="">12</li> -->
-            </ul>
+          <ul ui-sortable="sortableOptions" ng-model="day.shifts" class="shiftList" id="{{day.dId}}">
+            <li class="shift" ng-repeat="shift in day.shifts">
+              <h5><strong>{{ shift.empName }}</strong></h5>
+              <span>{{ shift.start }} &mdash; {{ shift.end }}
+            </li>
+          </ul>
           </div>
         </div>
       </section>

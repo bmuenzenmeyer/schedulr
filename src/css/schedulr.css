@@ -8,6 +8,10 @@ section{
 	margin-bottom: 1rem;
 }
 
+footer{
+	clear: both;
+}
+
 #scheduleIntervalInput{
 	width: 3em;
 }
@@ -17,11 +21,12 @@ section{
 }
 
 .day{
-	display: inline-block;
-	width: 97px;
+	display: block;
+	width: 105px;
 	min-height: 500px;
-	margin: 1em 1em;
-	padding-left: 1em;
+	margin: 1em .6em;
+	padding-left: .6em;
+	float: left;
 }
 
 .day + .day {
@@ -37,24 +42,49 @@ section{
 	border-bottom: 1px solid #999;
 }
 
-.connectedSortable { 
-	list-style-type: none; 
-	margin: 0; 
-	padding: 0;
+.shiftComposer{
 	float: left;
-	overflow: hidden;
-}
-.connectedSortable li { 
-	margin: 3px 3px 3px 0; 
-	padding: 1px; 
-	float: left; 
-	width: 100px; 
-	font-size: 2em; 
-	text-align: center; 
 }
 
-.shiftList{
+.shiftList { 
+	list-style-type: none; 
+	padding: 3px;
+	overflow: hidden;
+	min-height: 2em;
+	width: 100%;
+	background-color: #eee;
 	float: left;
+}
+
+.shiftList.unscheduled{
+	width: auto;
+	background-color: transparent;
+}
+
+.shift{
+	text-align: center;
+	padding: 1em;
+	background-color: #eee;
+	border: 1px solid #bbb;
+	margin: .25em 0; 
+	font-size: 1em; 
+	display: block;
+}
+
+.shift:hover{
+	cursor: move;
+}
+
+.shift.unscheduled{
+	border: 1px dotted #bbb;
+}
+
+.shift h5{
+	margin: 0;
+}
+
+.day .shiftList .shift{
+	border: 1px solid #bbb !important;
 }
 
 .print{

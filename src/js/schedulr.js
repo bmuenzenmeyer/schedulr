@@ -1,18 +1,20 @@
-function WeekCtrl($scope) {
+var app = angular.module('schedulr', ['ui.sortable']);
+
+app.controller('SchedulrCtrl', function($scope) {
 
   $scope.weekStart = undefined;
   $scope.scheduleInterval = 7;
   $scope.days = [];
+  $scope.shiftBuilderName = '';
+  $scope.shiftBuilderStart = '';
+  $scope.shiftBuilderEnd = '';
+  $scope.unScheduledShifts = [];
+  $scope.shifts = [];
 
   $scope.$watch('weekStart', function(newValue, oldValue){
     if(newValue !== oldValue){
       $scope.weekStart = newValue;
       $scope.buildDays();
-
-      // jQuery( "#dayList1, #dayList2" ).sortable({
-      //   connectWith: ".connectedSortable"
-      // }).disableSelection();
-
     }
 
   });
@@ -25,6 +27,10 @@ function WeekCtrl($scope) {
 
   });
 
+  $scope.sortableOptions = {
+    connectWith: ".shiftList"
+  };
+
   $scope.buildDays = function(){
     $scope.days.length = 0;
     var m = moment($scope.weekStart);
@@ -34,10 +40,26 @@ function WeekCtrl($scope) {
         date: d,
         mDate: d.format("MMM D"),
         dayOfWeek: d.format("dddd"),
-        dId: 'dayList'+i
+        dId: 'dId'+ d.format("MMDD"),
+        shifts: []
       };
       m.add('days', 1);
     }
+  };
+
+  $scope.addShift = function(){
+    $scope.unScheduledShifts.push({
+      empName : $scope.shiftBuilderName,
+      start: $scope.shiftBuilderStart,
+      end: $scope.shiftBuilderEnd
+    });
+
+    $scope.shiftBuilderName = '';
+    $scope.shiftBuilderStart = '';
+    $scope.shiftBuilderEnd = '';
+
+    $scope.initSortable();
+
   };
  
   // $scope.remaining = function() {
@@ -47,4 +69,5 @@ function WeekCtrl($scope) {
   //   });
   //   return count;
   // };
-}
+
+});

@@ -4,8 +4,12 @@ body{
 	border-top: 6px solid #ccc;
 }
 
+section{
+	margin-bottom: 1rem;
+}
+
 #scheduleIntervalInput{
-	width: 2em;
+	width: 3em;
 }
 
 .app{

@@ -9,7 +9,6 @@ app.controller('SchedulrCtrl', function($scope) {
   $scope.shiftBuilderStart = '';
   $scope.shiftBuilderEnd = '';
   $scope.unScheduledShifts = [];
-  $scope.shifts = [];
 
   $scope.$watch('weekStart', function(newValue, oldValue){
     if(newValue !== oldValue){

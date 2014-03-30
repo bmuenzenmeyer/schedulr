@@ -17,55 +17,128 @@
 </head>
 <body>
   <div ng-controller="SchedulrCtrl" class="app" id="schedulr">
-    <h3 class="class="inline hideOnPrint"">Schedulr</h3>
+
+    <header>
+      <h3 class="inline hideOnPrint">Schedulr <small>A dead-simple schedule creator for small businesses</small></h3>
+<!--       <button type="button" class="btn btn-primary float"><span class="glyphicon glyphicon-heart"></span> Donate</button><a href="donate.html" class="float">Tweet</a> -->
+    </header>
+
+
+
     <section class="toolbar">
       <form class="form-inline">
+        
         <div class="form-group">
-          <label for="weekStart">Week Starting: </label> <input id="weekStart" value="10/10/2010" name="weekStart" ng-model="weekStart" type="text" class="form-control"/>
+          <label for="weekStart" class="floatOnPrint">Week Starting: </label> <input id="weekStart" value="10/10/2010" name="weekStart" ng-model="weekStart" type="text" class="form-control floatOnPrint"/>
         </div>
+        
         <div class="form-group">
           <label class="hideOnPrint" for="scheduleInterval">Total Days: </label> <input id="scheduleIntervalInput" name="scheduleInterval" ng-model="scheduleInterval" type="text" class="hideOnPrint form-control"/>
         </div>
+      
       </form>
     </section>
+
     <section class="composer">
       <div class="shiftComposer hideOnPrint">
+        
         <form class="shiftBuilder">
+          
           <div class="form-group">
             <input id="empInput" ng-model="shiftBuilderName" name="empInput" type="text" class="form-control" placeholder="Employee Name" tabindex="1"/>
           </div>
+
           <div class="form-group">
-            <input id="shiftStartInput" ng-model="shiftBuilderStart" name="shiftStartInput" type="text" class="form-control" placeholder="Shift Start" tabindex="2"/>
+            <input id="shiftDescInput" ng-model="shiftBuilderDesc" name="shiftDescInput" type="text" class="form-control" placeholder="Shift Description (opt)" tabindex="2"/>
           </div>
-          <div class="form-group">
-            <input id="shiftEndInput" ng-model="shiftBuilderEnd" name="shiftEnd" type="text" class="form-control" placeholder="Shift End" tabindex="3"/>
+          
+          <div class="form-group" ng-class="{'has-error': hourError === true}">
+            <input id="shiftStartInput" ng-model="shiftBuilderStart" name="shiftStartInput" type="text" class="form-control" placeholder="Shift Start" tabindex="3"/>
           </div>
-          <div class="form-group">
-              <a class="btn btn-primary" ng-click="addShift()" tabindex="4">Create Shift</a>
+          
+          <div class="form-group" ng-class="{'has-error': hourError === true}">
+            <input id="shiftEndInput" ng-model="shiftBuilderEnd" name="shiftEnd" type="text" class="form-control" placeholder="Shift End" tabindex="4"/>
           </div>
+          
+          <div class="form-group" ng-disabled="hourError === true" ng-class="{disabled: hourError}">
+              <a class="btn btn-primary" ng-click="addShift()" tabindex="5">Create Shift</a>
+          </div>
+        
         </form>
+        
         <ul ui-sortable="sortableOptions" ng-model="unScheduledShifts" class="shiftList unscheduled">
           <li ng-repeat="shift in unScheduledShifts" class="shift unscheduled">
+
             <h5><strong>{{ shift.empName }}</strong></h5>
             <span>{{ shift.start }} &mdash; {{ shift.end }}
+            <div class=""><em>{{ shift.desc }}</em></div>
+
           </li>
         </ul>
+      
       </div>
+      
       <div class="dayCols">
         <div class="day" ng-repeat="day in days">
           <h4 class="dayTitle dayOfWeek"><strong>{{day.dayOfWeek}}</strong></h4>
           <h5 class="dayTitle dayMDate">{{day.mDate}}</h5>
+
           <ul ui-sortable="sortableOptions" ng-model="day.shifts" class="shiftList" id="{{day.dId}}">
-            <li class="shift" ng-repeat="shift in day.shifts">
+            <li class="shift" ng-repeat="shift in day.shifts" ng-dblclick="editShift(shift)">
+
               <h5><strong>{{ shift.empName }}</strong></h5>
-              <span>{{ shift.start }} &mdash; {{ shift.end }}
+              {{ shift.start }} &mdash; {{ shift.end }}
+              <div class=""><em>{{ shift.desc }}</em></div>
+
+              <form ng-submit="doneEditing(shift)" ng-show="shift.editing" class="shiftModal well hideOnPrint">
+
+                <h5>Edit or Delete Shift</h5> <span ng-click="doneEditing(shift)" class="close">&times;</span>
+
+                <div class="form-group">
+                  <input type="text" ng-model="shift.empName" class="form-control" tabindex="10"/>
+                </div>
+
+                <div class="form-group">
+                  <input type="text" ng-model="shift.desc" class="form-control" tabindex="11"/>
+                </div>
+
+                <div class="form-group">
+                  <input type="text" ng-model="shift.start" class="form-control" tabindex="12"/>
+                </div>
+
+                <div class="form-group">
+                  <input type="text" ng-model="shift.end" class="form-control" tabindex="13"/>
+                </div>   
+
+                <div class="form-group" ng-disabled="hourError === true" ng-class="{disabled: hourError}" class="btn-row">
+                  <a class="btn btn-primary" ng-click="saveShift(shift, day)" tabindex="14">Save Shift</a><a class="btn btn-danger" ng-click="deleteShift(shift, day)" tabindex="15">Delete Shift</a>
+                </div>             
+              
+              </form>
+
             </li>
           </ul>
+
           </div>
         </div>
+        
+        <aside class="hideOnPrint">
+          <h5>Employee Total Hours</h5>
+
+          <ul ng-model="employees" class="list-group">
+            <li ng-repeat="(name, value) in employees" class="list-group-item" ng-class="{'list-group-item-info': value.totalHours <= 40, 'list-group-item-danger': value.totalHours > 40}">{{ name }}<span class="badge" >{{ value.totalHours }}</span>
+            </li>
+          </ul>
+        
+        </aside>
+
       </section>
     </div>
-    <footer class="fine-print"><small class=""><span class="print">Created using </span> Schedulr &mdash; A dead-simple schedule creator for small businesses. A product by <a href="http://crunchyowl.com">www.crunchyowl.com</a></small></footer>
+
+    <footer class="fine-print">
+      <small class=""><span class="print">Created using </span> Schedulr &mdash; A dead-simple schedule creator for small businesses. A product by <a href="http://crunchyowl.com">www.crunchyowl.com</a></small>
+    </footer>
+
     <script>
 
     (function ($){
@@ -80,5 +153,6 @@
     })(jQuery);
 
     </script>
+
   </body>
   </html>

@@ -4,12 +4,31 @@ body{
 	border-top: 6px solid #ccc;
 }
 
+header .float{
+	float: right;
+}
+
 section{
 	margin-bottom: 1rem;
 }
 
+aside{
+	float: right;
+}
+
 footer{
 	clear: both;
+	margin: 1em;
+}
+form .btn{
+	float: right;
+	margin-left: 1em;
+}
+
+form.close{
+	position: relative;
+	top: 0;
+	right: 0;
 }
 
 #scheduleIntervalInput{
@@ -63,10 +82,9 @@ footer{
 
 .shift{
 	text-align: center;
-	padding: 1em;
+	padding: .5em;
 	background-color: #eee;
 	border: 1px solid #bbb;
-	margin: .25em 0; 
 	font-size: 1em; 
 	display: block;
 }
@@ -95,6 +113,21 @@ footer{
 	font-size: 10px;
 }
 
+.shiftModal{
+	width: 300px;
+	height: 300px;
+	margin: auto;
+  	position: absolute;
+  	top: 0; left: 0; bottom: 0; right: 0;
+	z-index: 1000;
+	background-color: ;
+}
+
+.shiftModal h5{
+	float: left;
+	margin-bottom: 1em;
+}
+
 @media only print{
 	.print{
 		display: inline-block;
@@ -110,5 +143,15 @@ footer{
 	input[type=text]{
 		border: none;
     	background: transparent;
+	}
+
+	.floatOnPrint{
+		float: right;
+		display: inline;
+		text-align: right;
+	}
+
+	.dayCols{
+		clear: both;
 	}
 }

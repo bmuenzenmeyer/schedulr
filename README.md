@@ -3,7 +3,7 @@ schedulr
 
 [Demo](http://bmuenzenmeyer.github.io/schedulr/src/index.html)
 
-A dead-simple schedule creator for small businesses - used to learn more about angularjs
+A dead-simple schedule creator for small businesses built with angularjs
 
 ###Features
 1. Dead simple drag and drop

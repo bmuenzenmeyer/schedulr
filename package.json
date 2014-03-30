@@ -1,0 +1,17 @@
+{
+  "name": "schedulr",
+  "description": "A dead-simple schedule creator for small businesses built with angularjs",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.0",
+    "grunt-contrib-nodeunit": "~0.1.2",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt-contrib-sass": "~0.2.2",
+    "grunt-contrib-copy": "~0.4.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-htmlmin": "^0.2.0",
+    "matchdep": "~0.3.0"
+  },
+  "author": "Brian Muenzenmeyer",
+  "license": "MIT"
+}

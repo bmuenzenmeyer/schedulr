@@ -1,0 +1,153 @@
+body{
+	overflow-x: scroll;
+	padding: 0;
+	border-top: 6px solid #ccc;
+}
+
+header .float{
+	float: right;
+}
+
+section{
+	margin-bottom: 1rem;
+}
+
+aside{
+	float: right;
+}
+
+footer{
+	clear: both;
+	margin: 1em;
+}
+form .btn{
+	float: right;
+	margin-left: 1em;
+}
+
+form.close{
+	position: relative;
+	top: 0;
+	right: 0;
+}
+
+#scheduleIntervalInput{
+	width: 3em;
+}
+
+.app{
+	margin: 0 1em;
+}
+
+.day{
+	display: block;
+	width: 105px;
+	min-height: 500px;
+	margin: 1em .6em;
+	padding-left: .6em;
+	float: left;
+}
+
+.day + .day {
+	border-left: 3px solid #999;
+}
+
+.dayTitle{
+	text-align: center;
+	padding-bottom: 3px;
+}
+
+.dayMDate{
+	border-bottom: 1px solid #999;
+}
+
+.shiftComposer{
+	float: left;
+}
+
+.shiftList { 
+	list-style-type: none; 
+	padding: 3px;
+	overflow: hidden;
+	min-height: 2em;
+	width: 100%;
+	background-color: #eee;
+	float: left;
+	&.unscheduled{
+		width: auto;
+		background-color: transparent;
+	}
+}
+
+.shift{
+	text-align: center;
+	padding: .5em;
+	background-color: #eee;
+	border: 1px solid #bbb;
+	font-size: 1em; 
+	display: block;
+
+	&:hover{
+		cursor: move;
+	}
+	&.unscheduled{
+		border: 1px dotted #bbb;
+	}
+	h5{
+	margin: 0;
+
+	}
+}
+
+.day .shiftList .shift{
+	border: 1px solid #bbb !important;
+}
+
+.print{
+	display: none;
+}
+
+.fine-print{
+	font-size: 10px;
+}
+
+.shiftModal{
+	width: 300px;
+	height: 300px;
+	margin: auto;
+  	position: absolute;
+  	top: 0; left: 0; bottom: 0; right: 0;
+	z-index: 1000;
+	h5{
+		float: left;
+		margin-bottom: 1em;
+	}
+}
+
+@media only print{
+	.print{
+		display: inline-block;
+	}
+	.hideOnPrint{
+		display: none;
+	}
+	.fine-print{
+		float: right;
+		position: fixed;
+		bottom: 5px;
+	}
+	input[type=text]{
+		border: none;
+    	background: transparent;
+	}
+
+	.floatOnPrint{
+		float: right;
+		display: inline;
+		text-align: right;
+	}
+
+	.dayCols{
+		clear: both;
+	}
+}

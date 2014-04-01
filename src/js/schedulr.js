@@ -2,15 +2,14 @@ var app = angular.module('schedulr', ['ui.sortable']);
 
 app.controller('SchedulrCtrl', function($scope) {
 
-  $scope.weekStart = undefined;
   $scope.scheduleInterval = 7;
   $scope.days = [];
   $scope.shiftBuilderName = '';
   $scope.shiftBuilderStart = '';
   $scope.shiftBuilderEnd = '';
   $scope.shiftBuilderDesc = '';
-  $scope.unScheduledShifts = [];
-  $scope.employees = {};
+  $scope.unscheduledShifts = [];
+  $scope.employees = [];
   $scope.hourError = false;
 
   $scope.$watch('weekStart', function(newValue, oldValue){
@@ -18,19 +17,20 @@ app.controller('SchedulrCtrl', function($scope) {
       $scope.weekStart = newValue;
       $scope.buildDays();
     }
-
   });
 
-    $scope.$watch('scheduleInterval', function(newValue, oldValue){
+  $scope.$watch('scheduleInterval', function(newValue, oldValue){
     if(newValue !== oldValue){
       $scope.scheduleInterval = newValue;
       $scope.buildDays();
     }
-
   });
 
   $scope.sortableOptions = {
-    connectWith: ".shiftList"
+    connectWith: ".shiftList",
+    update: function(){
+      calculateHourTotals();
+    }
   };
 
   function getShiftLength(start, end){
@@ -57,6 +57,33 @@ app.controller('SchedulrCtrl', function($scope) {
     return shiftLength;
   }
 
+  //this doesn't feel very angular
+  function calculateHourTotals(){
+    $scope.employees = [];
+    for(var i=0; i < $scope.days.length; i++){
+      for(var j=0; j < $scope.days[i].shifts.length; j++){
+
+        var shiftLength = getShiftLength($scope.days[i].shifts[j].start, $scope.days[i].shifts[j].end);
+        var name = $scope.days[i].shifts[j].name;
+        var isEmployee = false;
+
+        for(var k = 0; k < $scope.employees.length; k++){
+          if($scope.employees[k].name === name){
+            $scope.employees[k].totalHours += shiftLength;
+            isEmployee = true;
+          }
+        }
+
+        if(!isEmployee){
+          $scope.employees.push({
+            name: name,
+            totalHours: shiftLength
+          });
+        }
+      }
+    }
+  }
+
   $scope.buildDays = function(){
     $scope.days.length = 0;
     var m = moment($scope.weekStart);
@@ -80,8 +107,8 @@ app.controller('SchedulrCtrl', function($scope) {
     if($scope.hourError){
       return;
     }
-    $scope.unScheduledShifts.push({
-      empName : $scope.shiftBuilderName,
+    $scope.unscheduledShifts.push({
+      name : $scope.shiftBuilderName,
       start: $scope.shiftBuilderStart,
       end: $scope.shiftBuilderEnd,
       desc: $scope.shiftBuilderDesc,
@@ -89,22 +116,17 @@ app.controller('SchedulrCtrl', function($scope) {
       shiftLength: shiftLength
     });
 
-    if($scope.employees[$scope.shiftBuilderName]){
-      $scope.employees[$scope.shiftBuilderName].totalHours += shiftLength;
-    } else{
-      $scope.employees[$scope.shiftBuilderName] = {totalHours: shiftLength};
-    }
-
     $scope.shiftBuilderName = '';
     $scope.shiftBuilderStart = '';
     $scope.shiftBuilderEnd = '';
     $scope.shiftBuilderDesc = '';
 
+    calculateHourTotals();
+
   };
 
   $scope.saveShift = function(shift, day){
-
-    //todo - recalculate hours
+    calculateHourTotals();
     shift.editing = false;
   };
 
@@ -114,12 +136,14 @@ app.controller('SchedulrCtrl', function($scope) {
       return;
     }
     var d = $scope.days[$scope.days.indexOf(day)];
-
-    //remove shiftLength from employee
-    $scope.employees[shift.empName].totalHours -= shift.shiftLength;
-
-    shift.editing = false;
     d.shifts.splice(d.shifts.indexOf(shift),1);
+    shift.editing = false;
+    calculateHourTotals();
+
+  };
+
+  $scope.deleteEmployee = function(){
+
   };
 
   $scope.editShift = function(shift){
@@ -130,10 +154,10 @@ app.controller('SchedulrCtrl', function($scope) {
     shift.editing = false;
   };
 
-  // //quicker debugging
-  //   $scope.shiftBuilderName = 'Megan';
-  //   $scope.shiftBuilderStart = '9';
-  //   $scope.shiftBuilderEnd = '5';
-  //   $scope.shiftBuilderDesc = 'Cooking';
+  //quicker debugging
+  $scope.shiftBuilderName = 'Megan';
+  $scope.shiftBuilderStart = '9';
+  $scope.shiftBuilderEnd = '5';
+  $scope.shiftBuilderDesc = 'Cooking';
 
 });

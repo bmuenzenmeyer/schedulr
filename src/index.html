@@ -5,25 +5,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
   <meta name="viewport" content="width=device-width">
   <title>Schedulr - A dead-simple schedule creator for small businesses</title>
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.min.js"></script>
-  <script src="js/modules/sortable.js"></script>
-  <script src="js/modules/moment.min.js"></script>
-  <script src="js/schedulr.js"></script>
   <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
   <link href="css/schedulr.css" rel="stylesheet">
   <link href="css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
 </head>
 <body>
+  <header class="masthead hideOnPrint">
+    <h3 class="inline">Schedulr <small>A dead-simple schedule creator for small businesses</small></h3>
+  </header>
+
+  <!-- main application -->
+
   <div ng-controller="SchedulrCtrl" class="app" id="schedulr">
-
-    <header>
-      <h3 class="inline hideOnPrint">Schedulr <small>A dead-simple schedule creator for small businesses</small></h3>
-<!--       <button type="button" class="btn btn-primary float"><span class="glyphicon glyphicon-heart"></span> Donate</button><a href="donate.html" class="float">Tweet</a> -->
-    </header>
-
-
 
     <section class="toolbar">
       <form class="form-inline">
@@ -61,15 +54,15 @@
           </div>
           
           <div class="form-group" ng-disabled="hourError === true" ng-class="{disabled: hourError}">
-              <a class="btn btn-primary" ng-click="addShift()" tabindex="5">Create Shift</a>
+            <a class="btn btn-primary" ng-click="addShift()" tabindex="5">Create Shift</a>
           </div>
         
         </form>
         
-        <ul ui-sortable="sortableOptions" ng-model="unScheduledShifts" class="shiftList unscheduled">
-          <li ng-repeat="shift in unScheduledShifts" class="shift unscheduled">
+        <ul ui-sortable="sortableOptions" ng-model="unscheduledShifts" class="shiftList unscheduled">
+          <li ng-repeat="shift in unscheduledShifts" class="shift unscheduled">
 
-            <h5><strong>{{ shift.empName }}</strong></h5>
+            <h5><strong>{{ shift.name }}</strong></h5>
             <span>{{ shift.start }} &mdash; {{ shift.end }}
             <div class=""><em>{{ shift.desc }}</em></div>
 
@@ -86,7 +79,7 @@
           <ul ui-sortable="sortableOptions" ng-model="day.shifts" class="shiftList" id="{{day.dId}}">
             <li class="shift" ng-repeat="shift in day.shifts" ng-dblclick="editShift(shift)">
 
-              <h5><strong>{{ shift.empName }}</strong></h5>
+              <h5><strong>{{ shift.name }}</strong></h5>
               {{ shift.start }} &mdash; {{ shift.end }}
               <div class=""><em>{{ shift.desc }}</em></div>
 
@@ -95,7 +88,7 @@
                 <h5>Edit or Delete Shift</h5> <span ng-click="doneEditing(shift)" class="close">&times;</span>
 
                 <div class="form-group">
-                  <input type="text" ng-model="shift.empName" class="form-control" tabindex="10"/>
+                  <input type="text" ng-model="shift.name" class="form-control" disabled/>
                 </div>
 
                 <div class="form-group">
@@ -123,10 +116,10 @@
         </div>
         
         <aside class="hideOnPrint">
-          <h5>Employee Total Hours</h5>
+          <h5 ng-show="employees.length > 0">Employee Total Hours</h5>
 
           <ul ng-model="employees" class="list-group">
-            <li ng-repeat="(name, value) in employees" class="list-group-item" ng-class="{'list-group-item-info': value.totalHours <= 40, 'list-group-item-danger': value.totalHours > 40}">{{ name }}<span class="badge" >{{ value.totalHours }}</span>
+            <li ng-repeat="employee in employees" class="list-group-item" ng-class="{'list-group-item-info': employee.totalHours <= 40, 'list-group-item-danger': employee.totalHours > 40}">{{ employee.name }}<span class="badge" >{{ employee.totalHours }}</span>
             </li>
           </ul>
         
@@ -135,24 +128,42 @@
       </section>
     </div>
 
+    <!-- main application -->
+
     <footer class="fine-print">
       <small class=""><span class="print">Created using </span> Schedulr &mdash; A dead-simple schedule creator for small businesses. A product by <a href="http://crunchyowl.com">www.crunchyowl.com</a></small>
     </footer>
 
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.3/angular.min.js"></script>
+    <script src="js/schedulrapp.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script>
 
     (function ($){
 
       $(function() {
+
         $( "#weekStart" ).datepicker({
           showAnim: "fadeIn"
         }).val(moment().format('L')).change();
+
+        $('nav a').on('click', function(){
+          $('nav a, .overlay').removeClass('active');
+          $('#'+$(this).attr('data-target')).addClass('active');
+          $(this).addClass('active');
+        });
+
+        $('.dismissOverlay').on('click', function(){
+          $('nav a, .overlay').removeClass('active');
+        });
 
       });
 
     })(jQuery);
 
     </script>
+
 
   </body>
   </html>

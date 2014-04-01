@@ -1,11 +1,10 @@
+$subtle: #bbb;
+$grey: #ccc;
+
 body{
 	overflow-x: scroll;
 	padding: 0;
-	border-top: 6px solid #ccc;
-}
-
-header .float{
-	float: right;
+	border-top: 6px solid $grey;
 }
 
 section{
@@ -13,7 +12,8 @@ section{
 }
 
 aside{
-	float: right;
+	float: left;
+	border-left: $subtle;
 }
 
 footer{
@@ -31,12 +31,31 @@ form.close{
 	right: 0;
 }
 
+.masthead{
+	border-bottom: 1px solid $subtle;
+	line-height: 1.5em;
+	overflow: hidden;
+	h3, nav{
+		display: inline-block;
+	}
+	h3{
+		margin: 0 0 0 .5em;
+		padding-bottom: .5em;
+		padding-top: .5em;
+	}
+}
+
+.app{
+	margin: 1em;
+	clear: both;
+}
+
 #scheduleIntervalInput{
 	width: 3em;
 }
 
-.app{
-	margin: 0 1em;
+.form-inline label{
+	margin: 0 .5em;
 }
 
 .day{
@@ -49,7 +68,7 @@ form.close{
 }
 
 .day + .day {
-	border-left: 3px solid #999;
+	border-left: 3px solid $subtle;
 }
 
 .dayTitle{
@@ -58,7 +77,7 @@ form.close{
 }
 
 .dayMDate{
-	border-bottom: 1px solid #999;
+	border-bottom: 1px solid $subtle;
 }
 
 .shiftComposer{
@@ -83,7 +102,7 @@ form.close{
 	text-align: center;
 	padding: .5em;
 	background-color: #eee;
-	border: 1px solid #bbb;
+	border: 1px solid $subtle;
 	font-size: 1em; 
 	display: block;
 
@@ -91,7 +110,7 @@ form.close{
 		cursor: move;
 	}
 	&.unscheduled{
-		border: 1px dotted #bbb;
+		border: 1px dotted $subtle;
 	}
 	h5{
 	margin: 0;
@@ -100,7 +119,7 @@ form.close{
 }
 
 .day .shiftList .shift{
-	border: 1px solid #bbb !important;
+	border: 1px solid $grey !important;
 }
 
 .print{
@@ -111,11 +130,15 @@ form.close{
 	font-size: 10px;
 }
 
+.wrapped{
+	overflow: hidden;
+}
+
 .shiftModal{
 	width: 300px;
 	height: 300px;
 	margin: auto;
-  	position: absolute;
+  	position: fixed;
   	top: 0; left: 0; bottom: 0; right: 0;
 	z-index: 1000;
 	h5{

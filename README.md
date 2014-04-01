@@ -1,7 +1,7 @@
 schedulr
 ========
 
-[Demo](http://bmuenzenmeyer.github.io/schedulr/src/index.html)
+[Demo](http://bmuenzenmeyer.github.io/schedulr/build/index.html)
 
 A dead-simple schedule creator for small businesses built with angularjs
 

@@ -1,4 +1,370 @@
-//! moment.js
+var app = angular.module('schedulr', ['ui.sortable']);
+
+app.controller('SchedulrCtrl', function($scope) {
+
+  $scope.scheduleInterval = 7;
+  $scope.days = [];
+  $scope.shiftBuilderName = '';
+  $scope.shiftBuilderStart = '';
+  $scope.shiftBuilderEnd = '';
+  $scope.shiftBuilderDesc = '';
+  $scope.unscheduledShifts = [];
+  $scope.employees = [];
+  $scope.hourError = false;
+
+  $scope.$watch('weekStart', function(newValue, oldValue){
+    if(newValue !== oldValue){
+      $scope.weekStart = newValue;
+      $scope.buildDays();
+    }
+  });
+
+  $scope.$watch('scheduleInterval', function(newValue, oldValue){
+    if(newValue !== oldValue){
+      $scope.scheduleInterval = newValue;
+      $scope.buildDays();
+    }
+  });
+
+  $scope.sortableOptions = {
+    connectWith: ".shiftList",
+    update: function(){
+      calculateHourTotals();
+    }
+  };
+
+  function getShiftLength(start, end){
+
+    var safeStart = parseInt(start, 0);
+    var safeEnd = parseInt(end, 0);
+
+    var shiftLength = 0;
+    var additionalHours = 0;
+    if(!isNaN(safeStart) && !isNaN(safeEnd)){
+      $scope.hourError = false;
+      if(safeStart > safeEnd){
+        additionalHours = 12 - safeStart;
+        shiftLength = additionalHours + safeEnd;
+      } else if(safeStart < safeEnd){
+        shiftLength = safeEnd - safeStart;
+      } else{
+        shiftLength = 12;
+      }
+    } else{
+      //add notifcation to client
+      $scope.hourError = true;
+    }
+    return shiftLength;
+  }
+
+  //this doesn't feel very angular
+  function calculateHourTotals(){
+    $scope.employees = [];
+    for(var i=0; i < $scope.days.length; i++){
+      for(var j=0; j < $scope.days[i].shifts.length; j++){
+
+        var shiftLength = getShiftLength($scope.days[i].shifts[j].start, $scope.days[i].shifts[j].end);
+        var name = $scope.days[i].shifts[j].name;
+        var isEmployee = false;
+
+        for(var k = 0; k < $scope.employees.length; k++){
+          if($scope.employees[k].name === name){
+            $scope.employees[k].totalHours += shiftLength;
+            isEmployee = true;
+          }
+        }
+
+        if(!isEmployee){
+          $scope.employees.push({
+            name: name,
+            totalHours: shiftLength
+          });
+        }
+      }
+    }
+  }
+
+  $scope.buildDays = function(){
+    $scope.days.length = 0;
+    var m = moment($scope.weekStart);
+    for(var i=0; i < $scope.scheduleInterval; i++){
+      var d = m;
+      $scope.days[i] = {
+        date: d,
+        mDate: d.format("MMM D"),
+        dayOfWeek: d.format("dddd"),
+        dId: 'dId'+ d.format("MMDD"),
+        shifts: []
+      };
+      m.add('days', 1);
+    }
+  };
+
+  $scope.addShift = function(){
+
+    var shiftLength = getShiftLength($scope.shiftBuilderStart, $scope.shiftBuilderEnd);
+
+    if($scope.hourError){
+      return;
+    }
+    $scope.unscheduledShifts.push({
+      name : $scope.shiftBuilderName,
+      start: $scope.shiftBuilderStart,
+      end: $scope.shiftBuilderEnd,
+      desc: $scope.shiftBuilderDesc,
+      editing: false,
+      shiftLength: shiftLength
+    });
+
+    $scope.shiftBuilderName = '';
+    $scope.shiftBuilderStart = '';
+    $scope.shiftBuilderEnd = '';
+    $scope.shiftBuilderDesc = '';
+
+    calculateHourTotals();
+
+  };
+
+  $scope.saveShift = function(shift, day){
+    calculateHourTotals();
+    shift.editing = false;
+  };
+
+  $scope.deleteShift = function(shift, day){
+    var confirmDelete = confirm('Are you sure you want to delete this shift? Click Ok to delete.');
+    if(!confirmDelete){
+      return;
+    }
+    var d = $scope.days[$scope.days.indexOf(day)];
+    d.shifts.splice(d.shifts.indexOf(shift),1);
+    shift.editing = false;
+    calculateHourTotals();
+
+  };
+
+  $scope.deleteEmployee = function(){
+
+  };
+
+  $scope.editShift = function(shift){
+    shift.editing = true;
+  };
+
+  $scope.doneEditing = function(shift){
+    shift.editing = false;
+  };
+
+  //quicker debugging
+  $scope.shiftBuilderName = 'Megan';
+  $scope.shiftBuilderStart = '9';
+  $scope.shiftBuilderEnd = '5';
+  $scope.shiftBuilderDesc = 'Cooking';
+
+});;/*
+ jQuery UI Sortable plugin wrapper
+
+ @param [ui-sortable] {object} Options to pass to $.fn.sortable() merged onto ui.config
+ */
+angular.module('ui.sortable', [])
+  .value('uiSortableConfig',{})
+  .directive('uiSortable', [
+    'uiSortableConfig', '$timeout', '$log',
+    function(uiSortableConfig, $timeout, $log) {
+      return {
+        require: '?ngModel',
+        link: function(scope, element, attrs, ngModel) {
+          var savedNodes;
+
+          function combineCallbacks(first,second){
+            if(second && (typeof second === 'function')) {
+              return function(e, ui) {
+                first(e, ui);
+                second(e, ui);
+              };
+            }
+            return first;
+          }
+
+          var opts = {};
+
+          var callbacks = {
+            receive: null,
+            remove:null,
+            start:null,
+            stop:null,
+            update:null
+          };
+
+          angular.extend(opts, uiSortableConfig);
+
+          if (ngModel) {
+
+            // When we add or remove elements, we need the sortable to 'refresh'
+            // so it can find the new/removed elements.
+            scope.$watch(attrs.ngModel+'.length', function() {
+              // Timeout to let ng-repeat modify the DOM
+              $timeout(function() {
+                if (!!element.data('ui-sortable')) {
+                  element.sortable('refresh');
+                }
+              });
+            });
+
+            callbacks.start = function(e, ui) {
+              // Save the starting position of dragged item
+              ui.item.sortable = {
+                index: ui.item.index(),
+                cancel: function () {
+                  ui.item.sortable._isCanceled = true;
+                },
+                isCanceled: function () {
+                  return ui.item.sortable._isCanceled;
+                },
+                _isCanceled: false
+              };
+            };
+
+            callbacks.activate = function(/*e, ui*/) {
+              // We need to make a copy of the current element's contents so
+              // we can restore it after sortable has messed it up.
+              // This is inside activate (instead of start) in order to save
+              // both lists when dragging between connected lists.
+              savedNodes = element.contents();
+
+              // If this list has a placeholder (the connected lists won't),
+              // don't inlcude it in saved nodes.
+              var placeholder = element.sortable('option','placeholder');
+
+              // placeholder.element will be a function if the placeholder, has
+              // been created (placeholder will be an object).  If it hasn't
+              // been created, either placeholder will be false if no
+              // placeholder class was given or placeholder.element will be
+              // undefined if a class was given (placeholder will be a string)
+              if (placeholder && placeholder.element && typeof placeholder.element === 'function') {
+                var phElement = placeholder.element();
+                // workaround for jquery ui 1.9.x,
+                // not returning jquery collection
+                if (!phElement.jquery) {
+                  phElement = angular.element(phElement);
+                }
+
+                // exact match with the placeholder's class attribute to handle
+                // the case that multiple connected sortables exist and
+                // the placehoilder option equals the class of sortable items
+                var excludes = element.find('[class="' + phElement.attr('class') + '"]');
+
+                savedNodes = savedNodes.not(excludes);
+              }
+            };
+
+            callbacks.update = function(e, ui) {
+              // Save current drop position but only if this is not a second
+              // update that happens when moving between lists because then
+              // the value will be overwritten with the old value
+              if(!ui.item.sortable.received) {
+                ui.item.sortable.dropindex = ui.item.index();
+                ui.item.sortable.droptarget = ui.item.parent();
+
+                // Cancel the sort (let ng-repeat do the sort for us)
+                // Don't cancel if this is the received list because it has
+                // already been canceled in the other list, and trying to cancel
+                // here will mess up the DOM.
+                element.sortable('cancel');
+              }
+
+              // Put the nodes back exactly the way they started (this is very
+              // important because ng-repeat uses comment elements to delineate
+              // the start and stop of repeat sections and sortable doesn't
+              // respect their order (even if we cancel, the order of the
+              // comments are still messed up).
+              if (element.sortable('option','helper') === 'clone') {
+                // restore all the savedNodes except .ui-sortable-helper element
+                // (which is placed last). That way it will be garbage collected.
+                savedNodes = savedNodes.not(savedNodes.last());
+              }
+              savedNodes.appendTo(element);
+
+              // If received is true (an item was dropped in from another list)
+              // then we add the new item to this list otherwise wait until the
+              // stop event where we will know if it was a sort or item was
+              // moved here from another list
+              if(ui.item.sortable.received && !ui.item.sortable.isCanceled()) {
+                scope.$apply(function () {
+                  ngModel.$modelValue.splice(ui.item.sortable.dropindex, 0,
+                                             ui.item.sortable.moved);
+                });
+              }
+            };
+
+            callbacks.stop = function(e, ui) {
+              // If the received flag hasn't be set on the item, this is a
+              // normal sort, if dropindex is set, the item was moved, so move
+              // the items in the list.
+              if(!ui.item.sortable.received &&
+                 ('dropindex' in ui.item.sortable) &&
+                 !ui.item.sortable.isCanceled()) {
+
+                scope.$apply(function () {
+                  ngModel.$modelValue.splice(
+                    ui.item.sortable.dropindex, 0,
+                    ngModel.$modelValue.splice(ui.item.sortable.index, 1)[0]);
+                });
+              } else {
+                // if the item was not moved, then restore the elements
+                // so that the ngRepeat's comment are correct.
+                if((!('dropindex' in ui.item.sortable) || ui.item.sortable.isCanceled()) && element.sortable('option','helper') !== 'clone') {
+                  savedNodes.appendTo(element);
+                }
+              }
+            };
+
+            callbacks.receive = function(e, ui) {
+              // An item was dropped here from another list, set a flag on the
+              // item.
+              ui.item.sortable.received = true;
+            };
+
+            callbacks.remove = function(e, ui) {
+              // Remove the item from this list's model and copy data into item,
+              // so the next list can retrive it
+              if (!ui.item.sortable.isCanceled()) {
+                scope.$apply(function () {
+                  ui.item.sortable.moved = ngModel.$modelValue.splice(
+                    ui.item.sortable.index, 1)[0];
+                });
+              }
+            };
+
+            scope.$watch(attrs.uiSortable, function(newVal /*, oldVal*/) {
+              angular.forEach(newVal, function(value, key) {
+                if(callbacks[key]) {
+                  if( key === 'stop' ){
+                    // call apply after stop
+                    value = combineCallbacks(
+                      value, function() { scope.$apply(); });
+                  }
+                  // wrap the callback
+                  value = combineCallbacks(callbacks[key], value);
+                }
+                element.sortable('option', key, value);
+              });
+            }, true);
+
+            angular.forEach(callbacks, function(value, key) {
+              opts[key] = combineCallbacks(value, opts[key]);
+            });
+
+          } else {
+            $log.info('ui.sortable: ngModel not provided!', element);
+          }
+
+          // Create sortable
+          element.sortable(opts);
+        }
+      };
+    }
+  ]);
+;//! moment.js
 //! version : 2.5.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
